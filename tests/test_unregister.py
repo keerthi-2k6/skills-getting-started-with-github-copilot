@@ -18,6 +18,25 @@ def client():
     return TestClient(app_module.app)
 
 
+def test_signup_adds_participant(client):
+    response = client.post(
+        "/activities/Chess Club/signup?email=newstudent@mergington.edu"
+    )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Signed up newstudent@mergington.edu for Chess Club"
+    assert "newstudent@mergington.edu" in app_module.activities["Chess Club"]["participants"]
+
+
+def test_duplicate_signup_returns_error(client):
+    response = client.post(
+        "/activities/Chess Club/signup?email=michael@mergington.edu"
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Student already signed up for this activity"
+
+
 def test_unregister_existing_participant_removes_them(client):
     response = client.delete(
         "/activities/Chess Club/unregister?email=michael@mergington.edu"
